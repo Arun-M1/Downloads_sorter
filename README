@@ -1,0 +1,3 @@
+auto_run.py is a python script that is intended to run in the background of windows computer.
+While running, anytime a file is added to downloads folder, it will run organize_downloads.py and put the file into appropriate folder based on extension type.
+Still buggy and needs some cleaning up. 
