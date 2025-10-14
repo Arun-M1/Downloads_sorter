@@ -13,32 +13,31 @@ class DownloadsOrganizer(FileSystemEventHandler):
     def __init__(self, downloads_path):
         self.downloads_path = Path(downloads_path)
 
-    
+    def on_created(self, event):
+        # return super().on_created(event)
+        #write own logic here
+        if event.is_directory:
+            print(f"Error: current {event} is a directory, not a file!")
+            return
 
-    def get_newest_downloaded_file(downloads_path) -> str:
-            most_recent_file = ""
-            most_recent_time = 0
-            for file in os.scandir(downloads_path):
-                if file.is_file():
-                    mod_time = file.stat().st_mtime_ns
-                    if mod_time > most_recent_time:
-                        most_recent_file = file.name
-                        most_recent_time = mod_time
-
-            return most_recent_file
+        file_path = Path(event.src_path)
+        extension_type = self.get_extension_type(file_path)
+        print(f"file path: {file_path}, extension type of file: {extension_type}")
+        # self.create_folder(event, extension_type, self.downloads_path)
+        # self.move_to_folder(event, extension_type, self.downloads_path)
 
     #check type of file
-    def get_extension_type(file) -> str:
-        extension = os.path.splitext(file)
+    def get_extension_type(self, file_path) -> str:
+        extension = os.path.splitext(str(file_path))
         root = extension[0]
         ext = extension[1]
-        #print(root, ext)
+        print(root, ext)
         return ext
 
     #make folders and categorize based on file type
     #example: application into applications folder, pdf into pdf folder, mp3 into mp3 folder
     #if folder exists, update folder, else create new folder
-    def create_folder(file, extension, downloads_path):
+    def create_folder(self, file, extension, downloads_path):
         new_folder = os.path.join(downloads_path, extension)
         try:
             os.makedirs(new_folder)
@@ -55,7 +54,7 @@ class DownloadsOrganizer(FileSystemEventHandler):
     #     except Exception as e:
     #         print(f"Error occurred: {e}")
 
-    def move_to_folder(file_to_move, extension_type, downloads_path):
+    def move_to_folder(self, file_to_move, extension_type, downloads_path):
             #check if folder is subfolder of downloads
             if extension_type not in exclude_types:
                 folder_name = os.path.join(downloads_path, extension_type)
@@ -74,8 +73,12 @@ class DownloadsOrganizer(FileSystemEventHandler):
                 except Exception as e:
                     print(f"Error occurred: {e}")
 
-def main():
-    downloads_path = Path.home().joinpath("Downloads") #works for windows, mac, linux
+def main(custom_path=None):
+    if custom_path:
+        downloads_path = Path(custom_path)
+    else:
+        downloads_path = Path.home().joinpath("Downloads") #works for windows, mac, linux
+    
     #print(downloads_path)
     if not downloads_path.exists():
         print(f"Error: Downloads folder was not found at {downloads_path}")
@@ -103,4 +106,9 @@ def main():
     observer_obj.join()
 
 if __name__ == "__main__":
-    main()
+    test_dir = Path.home().joinpath("Downloads_Test")
+    
+    if test_dir.exists():
+        main(test_dir)
+    else:
+        main()
